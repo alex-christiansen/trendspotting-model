@@ -1,0 +1,378 @@
+view: categoryclusters {
+  label: "Category Clusters"
+  sql_table_name: `yourproject.yourdataset.yourtable`;;
+  # sql_table_name: yourproject.yourdatasaet.{% parameter table %};;
+
+
+  # parameter: table {
+  #   label: "Country"
+  #   type: unquoted
+
+  #   allowed_value: {
+  #     label: "Thailand 🇹🇭"
+  #     value: "table_categoryclusters"
+  #   }
+  #   allowed_value: {
+  #     label: "Malaysia 🇲🇾"
+  #     value: "table_categoryclusters"
+  #   }
+  #   default_value: "table_categoryclusters"
+  # }
+
+##### Dimensions #####
+
+  dimension_group: current {
+    type: time
+    timeframes: [
+      raw,
+      date,
+      week,
+      month,
+      quarter,
+      year
+    ]
+    convert_tz: no
+    datatype: date
+    sql: ${TABLE}.date ;;
+  }
+
+  dimension: geo_name {
+    type: string
+    description: "The geographic designator for the keyword. In US, this is typically DMA, and is usually country code otherwise. Can be down to region as well"
+    sql: ${TABLE}.geo_name ;;
+  }
+
+  dimension: score {
+    type: number
+    description: "The relative score of the keyword rank over time. This is indexed so insights are all relative to the dataset"
+    sql: ${TABLE}.score ;;
+  }
+
+  dimension: sentences {
+    label: "Search Term"
+    type: string
+    description: "The keywords users type into google.com"
+    sql: ${TABLE}.sentences ;;
+    link: {
+      label: "Google {{ value }}"
+      url: "http://www.google.com/search?q={{ value | encode_uri }}"
+    }
+    link: {
+      label: "Translate {{ value }}"
+      url: "https://translate.google.com/?hl=en&sl=auto&tl=en&text={{ value }}&op=translate"
+    }
+    link: {
+      label: "{{value}} Analytics Dashboard"
+      url: "/dashboards/1?Terms={{ value | encode_uri }}"
+    }
+    action: {
+      label: "Start Adwords Campaign"
+      param: {
+        name: "some_auth_code"
+        value: "abc123456"
+      }
+      form_param: {
+        type: select
+        name: "Campaign Type"
+        option: { name: "Spend" label: "Spend" }
+        option: { name: "Leads" label: "Leads" }
+        option: { name: "Website Traffic" label: "Website Traffic" }
+        required: yes
+      }
+      form_param: {
+        name: "Campaign Name"
+        type: string
+        required: yes
+        default: "{{ value }} Campaign"
+      }
+
+      form_param: {
+        name: "Product Category"
+        type: string
+        required: yes
+        default: "{{ value }}"
+      }
+
+      form_param: {
+        name: "Budget"
+        type: string
+        required: yes
+      }
+
+      form_param: {
+        name: "Keywords"
+        type: string
+        required: yes
+        default: "{{ value }}"
+      }
+    }
+    link: {
+      label: "Pause Campaign"
+      icon_url: "https://www.google.com/s2/favicons?domain=www.adwords.google.com"
+      url: "https://adwords.google.com/aw/ads?campaignId={{ value | url_encode }}"
+    }
+    action: {
+      label: "Send to Slack"
+      icon_url: "https://cdn-icons-png.flaticon.com/512/2111/2111615.png"
+
+      form_param: {
+        name: "Title"
+        type: string
+        default: "{{value}} campaign"
+      }
+
+      form_param: {
+        name: "Message"
+        type: textarea
+        default: "Hey — could you check out the latest on {{value}}?"
+      }
+    }
+  }
+
+  dimension: topic_id {
+    type: number
+    sql: ${TABLE}.TOPIC_ID ;;
+  }
+
+##### Measures #####
+
+  measure: count {
+    type: count
+    drill_fields: [geo_name, current_date, score, sentences, topic_id]
+  }
+
+  measure: total_score {
+    group_label: "Score Metrics"
+    type: sum
+    sql: ${score} ;;
+    value_format_name: decimal_2
+    drill_fields: [sentences, current_date, total_score, topic_id]
+  }
+
+  measure: average_score {
+    group_label: "Score Metrics"
+    type: average
+    sql: ${score} ;;
+    value_format_name: decimal_2
+  }
+
+  measure: min_score {
+    group_label: "Score Metrics"
+    type: min
+    sql: ${score} ;;
+    value_format_name: decimal_2
+  }
+
+  measure: max_score {
+    group_label: "Score Metrics"
+    type: max
+    sql: ${score} ;;
+    value_format_name: decimal_2
+  }
+
+  measure: median_score {
+    group_label: "Score Metrics"
+    type: median
+    sql: ${score} ;;
+    value_format_name: decimal_2
+  }
+
+##### Hidden Fields #####
+
+  dimension: comments_embed__p1 {
+    hidden: yes
+    type: number
+    sql: ${TABLE}.comments_embed.p1 ;;
+    group_label: "Comments Embed"
+    group_item_label: "P1"
+  }
+
+  dimension: comments_embed__p10 {
+    hidden: yes
+    type: number
+    sql: ${TABLE}.comments_embed.p10 ;;
+    group_label: "Comments Embed"
+    group_item_label: "P10"
+  }
+
+  dimension: comments_embed__p11 {
+    hidden: yes
+    type: number
+    sql: ${TABLE}.comments_embed.p11 ;;
+    group_label: "Comments Embed"
+    group_item_label: "P11"
+  }
+
+  dimension: comments_embed__p12 {
+    hidden: yes
+    type: number
+    sql: ${TABLE}.comments_embed.p12 ;;
+    group_label: "Comments Embed"
+    group_item_label: "P12"
+  }
+
+  dimension: comments_embed__p13 {
+    hidden: yes
+    type: number
+    sql: ${TABLE}.comments_embed.p13 ;;
+    group_label: "Comments Embed"
+    group_item_label: "P13"
+  }
+
+  dimension: comments_embed__p14 {
+    hidden: yes
+    type: number
+    sql: ${TABLE}.comments_embed.p14 ;;
+    group_label: "Comments Embed"
+    group_item_label: "P14"
+  }
+
+  dimension: comments_embed__p15 {
+    hidden: yes
+    type: number
+    sql: ${TABLE}.comments_embed.p15 ;;
+    group_label: "Comments Embed"
+    group_item_label: "P15"
+  }
+
+  dimension: comments_embed__p16 {
+    hidden: yes
+    type: number
+    sql: ${TABLE}.comments_embed.p16 ;;
+    group_label: "Comments Embed"
+    group_item_label: "P16"
+  }
+
+  dimension: comments_embed__p17 {
+    hidden: yes
+    type: number
+    sql: ${TABLE}.comments_embed.p17 ;;
+    group_label: "Comments Embed"
+    group_item_label: "P17"
+  }
+
+  dimension: comments_embed__p18 {
+    hidden: yes
+    type: number
+    sql: ${TABLE}.comments_embed.p18 ;;
+    group_label: "Comments Embed"
+    group_item_label: "P18"
+  }
+
+  dimension: comments_embed__p19 {
+    hidden: yes
+    type: number
+    sql: ${TABLE}.comments_embed.p19 ;;
+    group_label: "Comments Embed"
+    group_item_label: "P19"
+  }
+
+  dimension: comments_embed__p2 {
+    hidden: yes
+    type: number
+    sql: ${TABLE}.comments_embed.p2 ;;
+    group_label: "Comments Embed"
+    group_item_label: "P2"
+  }
+
+  dimension: comments_embed__p20 {
+    hidden: yes
+    type: number
+    sql: ${TABLE}.comments_embed.p20 ;;
+    group_label: "Comments Embed"
+    group_item_label: "P20"
+  }
+
+  dimension: comments_embed__p3 {
+    hidden: yes
+    type: number
+    sql: ${TABLE}.comments_embed.p3 ;;
+    group_label: "Comments Embed"
+    group_item_label: "P3"
+  }
+
+  dimension: comments_embed__p4 {
+    hidden: yes
+    type: number
+    sql: ${TABLE}.comments_embed.p4 ;;
+    group_label: "Comments Embed"
+    group_item_label: "P4"
+  }
+
+  dimension: comments_embed__p5 {
+    hidden: yes
+    type: number
+    sql: ${TABLE}.comments_embed.p5 ;;
+    group_label: "Comments Embed"
+    group_item_label: "P5"
+  }
+
+  dimension: comments_embed__p6 {
+    hidden: yes
+    type: number
+    sql: ${TABLE}.comments_embed.p6 ;;
+    group_label: "Comments Embed"
+    group_item_label: "P6"
+  }
+
+  dimension: comments_embed__p7 {
+    hidden: yes
+    type: number
+    sql: ${TABLE}.comments_embed.p7 ;;
+    group_label: "Comments Embed"
+    group_item_label: "P7"
+  }
+
+  dimension: comments_embed__p8 {
+    hidden: yes
+    type: number
+    sql: ${TABLE}.comments_embed.p8 ;;
+    group_label: "Comments Embed"
+    group_item_label: "P8"
+  }
+
+  dimension: comments_embed__p9 {
+    hidden: yes
+    type: number
+    sql: ${TABLE}.comments_embed.p9 ;;
+    group_label: "Comments Embed"
+    group_item_label: "P9"
+  }
+
+  dimension: nearest_centroids_distance {
+    hidden: yes
+    sql: ${TABLE}.NEAREST_CENTROIDS_DISTANCE ;;
+  }
+
+  dimension: output_0 {
+    hidden: yes
+    sql: ${TABLE}.output_0 ;;
+  }
+}
+
+# view: categoryclusters__output_0 {
+#   dimension: categoryclusters__output_0 {
+#     type: number
+#     description: "Vector format of the embeddings. These are transposed to the comments_embed struct so they can be read by the model. These come from tf.hub universal sentence encoder NLP model https://tfhub.dev/google/collections/universal-sentence-encoder/1"
+#     sql: categoryclusters__output_0 ;;
+#   }
+# }
+
+# view: categoryclusters__nearest_centroids_distance {
+#   dimension: centroid_id {
+#     type: number
+#     sql: CENTROID_ID ;;
+#   }
+
+#   dimension: categoryclusters__nearest_centroids_distance {
+#     type: string
+#     description: "The closest distance shows the distance of the given row/keyword from the various cluster centers. The closest cluster gets assigned to CENTROID_ID"
+#     hidden: yes
+#     sql: categoryclusters__nearest_centroids_distance ;;
+#   }
+
+#   dimension: distance {
+#     type: number
+#     sql: DISTANCE ;;
+#   }
+# }
